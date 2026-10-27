@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>Звериный Побег v24</title>
+<title>Звериный Побег v29</title>
 <style>
 :root{--bg:#1a140c;--pan:#2b2014;--pan2:#3a2b1b;--ink:#e8d9a8;--acc:#c7a24a;--line:#6b5230}
 html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;font-family:"Trebuchet MS","Segoe UI",sans-serif;color:var(--ink)}
@@ -10,6 +10,7 @@ button,.box,.npc,.gear-item,.gear-slot{ -webkit-tap-highlight-color:transparent 
 .btn,.b{border-radius:10px}
 #mm{border-radius:10px;backdrop-filter:blur(3px)}
 #interactBtn{z-index:7;background:linear-gradient(145deg,#d4b65f,#80602a);color:#171108;border-color:#f0d98a;font-size:11px;font-weight:900;box-shadow:0 4px 0 #0008}
+#medBtn{z-index:7;right:88px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:84px;height:54px;background:linear-gradient(145deg,#b94b3e,#6e241e);color:#fff1d6;border-color:#e58b70;font-size:11px;font-weight:900;box-shadow:0 4px 0 #0008;display:none}
 #mm{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:160px;height:160px;border:2px solid var(--line);border-radius:4px;z-index:4;box-shadow:0 2px 0 #000}
 .b{position:fixed;right:calc(12px + env(safe-area-inset-right,0px));width:62px;height:62px;border-radius:6px;border:3px solid var(--line);background:var(--pan2);color:var(--ink);font:bold 11px "Trebuchet MS",sans-serif;z-index:5;box-shadow:0 3px 0 #000}
 #rl{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
@@ -23,6 +24,7 @@ button,.box,.npc,.gear-item,.gear-slot{ -webkit-tap-highlight-color:transparent 
  #bk{right:calc(68px + env(safe-area-inset-right,0px))}
  #fb{right:calc(128px + env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px))}
  #interactBtn{right:calc(188px + env(safe-area-inset-right,0px))!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:78px!important;height:48px!important}
+ #medBtn{right:calc(268px + env(safe-area-inset-right,0px))!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:78px!important;height:48px!important}
 }
 
 .scr{position:fixed;inset:0;background:rgba(14,10,6,.93);display:none;flex-direction:column;align-items:center;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 14px;box-sizing:border-box;z-index:9;overflow:auto}
@@ -34,7 +36,7 @@ button,.box,.npc,.gear-item,.gear-slot{ -webkit-tap-highlight-color:transparent 
 #base{padding-bottom:22px}
 h1{font-size:20px;margin:2px 0 8px;color:var(--acc);text-transform:uppercase;letter-spacing:1px}
 .row{display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:1px solid var(--line)}
-.row-ico{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border:1px solid #765a31;border-radius:8px;background:radial-gradient(circle at 35% 25%,#493821,#17110b 78%);box-shadow:inset 0 1px 0 #ffffff12,0 2px 0 #0007;font-size:22px;line-height:1}.row-ico.weapon{font-size:21px}.row span.row-label{flex:1;min-width:0;font-size:14px;line-height:1.3}.row .btn{flex-shrink:0;white-space:nowrap}.market-section .row{background:linear-gradient(90deg,#ffffff04,transparent);border-radius:5px}
+.row-ico{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border:1px solid #765a31;border-radius:8px;background:radial-gradient(circle at 35% 25%,#493821,#17110b 78%);box-shadow:inset 0 1px 0 #ffffff12,0 2px 0 #0007;font-size:22px;line-height:1}.row-ico.weapon{font-size:21px} .row-ico.medkit{color:#d92732;background:linear-gradient(145deg,#fff8e7,#d9d0b7);font-size:28px;font-weight:900;text-shadow:0 1px #fff;}.row span.row-label{flex:1;min-width:0;font-size:14px;line-height:1.3}.row .btn{flex-shrink:0;white-space:nowrap}.market-section .row{background:linear-gradient(90deg,#ffffff04,transparent);border-radius:5px}
 .row span{flex:1;font-size:15px}
 .btn{background:var(--pan2);color:var(--ink);border:2px solid var(--line);border-radius:6px;padding:9px 12px;font:bold 14px "Trebuchet MS",sans-serif;box-shadow:0 2px 0 #000;cursor:pointer}
 .btn.big{font-size:18px;padding:13px 18px;background:var(--acc);color:#1a140c;width:100%;margin:8px 0 0}
@@ -52,6 +54,14 @@ small{opacity:.75}
 
 #lootPanel{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,420px);max-height:78vh;overflow:auto;display:none;z-index:40;background:linear-gradient(145deg,#28241d,#111310);border:2px solid #b99a57;border-radius:12px;padding:14px;box-shadow:0 12px 45px #000d;color:#e8dfc4;box-sizing:border-box}
 #lootPanel.on{display:block}.loot-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #514a3a}.loot-icon{width:44px;height:44px;display:grid;place-items:center;background:#171915;border:1px solid #777052;border-radius:7px;font-size:25px;flex-shrink:0}.loot-info{flex:1;font-size:13px}.loot-info small{display:block;color:#c0b48f;margin-top:3px}.loot-actions{display:flex;gap:6px}.loot-actions .btn{font-size:11px;padding:7px}.loot-hint{color:#c9b987;font-size:12px;margin:4px 0 10px}.loot-top{display:flex;align-items:center;gap:8px;justify-content:space-between}.loot-top h1{margin:0}.loot-actions .btn{white-space:nowrap}.dialog-choice{display:block;width:100%;text-align:left;margin:7px 0;line-height:1.35}.trustbar{height:8px;background:#15120e;border:1px solid #70532d;border-radius:8px;overflow:hidden;margin:7px 0}.trustbar i{display:block;height:100%;background:linear-gradient(90deg,#a33a2e,#c6a34c,#7ca35c)}.lore{padding:10px;background:linear-gradient(120deg,#1b1913,#30271a);border-left:3px solid #b99a57;margin:8px 0;font-size:13px;line-height:1.45;color:#d7c79e}
+@media(max-width:430px){
+ #inv .box{padding:10px}
+ #grid{gap:8px!important}
+ #grid>div{padding:5px!important;border-radius:8px!important}
+ #grid canvas{border-width:1px}
+ #grid .btn{min-height:34px;font-size:10px;padding:6px 2px}
+ #inv .btn.big{min-height:46px}
+}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="lootPanel"><div class="loot-top"><h1>Предметы рядом</h1><button class="btn" onclick="closeLoot()">✕</button></div><div class="loot-hint">Выбирай, что забрать. Остальное останется лежать здесь.</div><button id="takeAllBtn" class="btn big" style="margin:0 0 8px;display:none" onclick="takeAllGround()">ЗАБРАТЬ ВСЁ</button><div id="lootRows"></div><button class="btn big" onclick="closeLoot()">ЗАКРЫТЬ</button></div>
@@ -60,13 +70,14 @@ small{opacity:.75}
 <button class="b" id="bk">РЮКЗАК</button>
 <button class="b on" id="fb">ФОНАРЬ</button>
 <button class="b" id="interactBtn" style="right:88px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:84px;height:54px;display:none">ОСМОТР</button>
+<button class="b" id="medBtn" aria-label="Быстро использовать аптечку">✚ АПТЕЧКА</button>
 
 <div class="scr on" id="base">
  <div class="box"><h1>Нора</h1><div class="msg" id="bmsg"></div><div id="caps"></div></div>
  <div class="tabs"><button type="button" class="btn on" data-t="raid">РЕЙД</button><button type="button" class="btn" data-t="gear">СНАРЯГА</button><button type="button" class="btn" data-t="market">РЫНОК</button><button type="button" class="btn" data-t="sell">БОРИС</button><button type="button" class="btn" data-t="quest">КВЕСТЫ</button></div>
  <div class="box" id="bcont"></div>
 </div>
-<div class="scr" id="inv"><div class="box"><h1>Рюкзак</h1><div id="grid"></div><div class="msg" id="iv"></div><button class="btn big" id="ic">ЗАКРЫТЬ</button></div></div>
+<div class="scr" id="inv"><div class="box"><h1>Рюкзак</h1><div class="msg" style="margin-top:0">Нажатие использует только еду, воду и аптечки. Остальные предметы можно экипировать или выбросить.</div><div id="grid"></div><div class="msg" id="iv"></div><button class="btn big" id="ic">ЗАКРЫТЬ</button></div></div>
 
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
@@ -378,13 +389,18 @@ function renderBase(){
   document.getElementById('bmsg').textContent=lastMsg;
   document.querySelectorAll('.tabs .btn').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
   const marketIcon=(label)=>{const t=String(label).replace(/<[^>]*>/g,' ').toLowerCase();
+    // Specific item names first, so a broad category never steals another item's icon.
+    if(/кепк|панам|шапк/.test(t))return ['🧢',''];
+    if(/аптеч|медицин|первая помощь/.test(t))return ['✚','medkit'];
+    if(/консерв|пайк/.test(t))return ['🥫',''];
+    if(/энергобатон|батончик/.test(t))return ['🍫',''];
+    if(/вода|жажд/.test(t))return ['💧',''];
     if(/автомат|пистолет|мини-пп|дробовик|снайпер|оруж|патрон/.test(t))return ['🔫','weapon'];
     if(/жилет|бронежилет|броня|защит/.test(t))return ['🦺',''];
     if(/шлем|каск|сфера/.test(t))return ['🪖',''];
     if(/рюкзак|слотов|ячеек/.test(t))return ['🎒',''];
-    if(/аптеч|медицин|здоров/.test(t))return ['🩹',''];
-    if(/вода|жажд/.test(t))return ['🧴',''];
-    if(/консерв|пайк|питани|сыр|батончик|мёд/.test(t))return ['🥫',''];
+    if(/сыр/.test(t))return ['🧀',''];
+    if(/мёд|мед/.test(t))return ['🍯',''];
     if(/раци|связ|ретранслятор/.test(t))return ['📻',''];
     if(/час/.test(t))return ['⌚',''];
     if(/болт|крепёж|детал/.test(t))return ['🔩',''];
@@ -637,7 +653,7 @@ function renderLoot(){if(!G)return;const root=document.getElementById('lootRows'
  if(!items.length){root.innerHTML='<div class="msg">Больше ничего рядом нет.</div>';document.getElementById('takeAllBtn').style.display='none';if(G.lootOpen)closeLoot();return}
  document.getElementById('takeAllBtn').style.display=items.length>1?'block':'none';document.getElementById('takeAllBtn').textContent='ЗАБРАТЬ ВСЁ ('+items.length+')';
  const ico={med:'✚',food:'🥫',water:'💧',snack:'🍫',cheese:'🧀',bolt:'⚙️',gem:'💎',honey:'🍯',radio:'📻',watch:'⌚',pistol:'🔫',ak:'🔫',smg:'🔫',shotgun:'🔫',rifle:'🎯',ammo:'🟡'};
- root.innerHTML=items.map(({q,src})=>`<div class="loot-row"><div class="loot-icon">${ico[q.it?.k]||'📦'}</div><div class="loot-info"><b>${q.n||q.it?.n||'Находка'}</b><small>${q.it?.k==='med'?'Лечение':q.it?.k==='food'?'Восстанавливает здоровье и сытость':q.it?.k==='water'?'Утоляет жажду':'Можно продать за '+(q.it?.v||0)+' крышек'}</small></div><div class="loot-actions"><button class="btn" onclick="takeGround('${src}',${q.x},${q.y})">ВЗЯТЬ</button></div></div>`).join('')
+ root.innerHTML=items.map(({q,src})=>{const itemName=(src==='crate'||src==='room')?(q.it?.n||'Находка'):(q.n||q.it?.n||'Находка');const containerName=src==='crate'?(q.kind==='bag'?'Рюкзак':q.kind==='medbag'?'Медицинская сумка':q.kind==='cabinet'?'Шкафчик':q.kind==='tool'?'Ящик с инструментами':'Контейнер'):src==='room'?'Находка в помещении':'';const detail=q.it?.k==='med'?'Лечение':q.it?.k==='food'?'Восстанавливает здоровье и сытость':q.it?.k==='water'?'Утоляет жажду':q.it?.k==='snack'?'Восстанавливает сытость':q.it?.k==='cheese'?'Еда: немного лечит и насыщает':q.it?.k==='honey'?'Еда: лечит и насыщает':'Можно продать за '+(q.it?.v||0)+' крышек';return `<div class="loot-row"><div class="loot-icon">${ico[q.it?.k]||'📦'}</div><div class="loot-info"><b>${itemName}</b><small>${containerName?containerName+' · ':''}${detail}</small></div><div class="loot-actions"><button class="btn" onclick="takeGround('${src}',${q.x},${q.y})">ВЗЯТЬ</button></div></div>`}).join('')
 }
 function findGround(src,x,y){const arr=src==='room'?(G.currentHouse?.roomLoot||[]):src==='crate'?G.crates:G.floorItems;return arr.find(q=>!q.done&&Math.abs(q.x-x)<.1&&Math.abs(q.y-y)<.1)}
 function takeGround(src,x,y){const q=findGround(src,x,y);if(!q)return;if(give(q.it)){q.done=true;floaty(q.x,q.y,'+ '+q.it.n);sfx('pickup');const remaining=lootCandidates();if(!remaining.length)closeLoot();else renderLoot()}else{floaty(G.p.x,G.p.y,'Рюкзак полон');sfx('error')}}
@@ -688,22 +704,23 @@ function bindBtn(id,fn){
   // Binding both touchstart and click caused toggles (especially backpack) to run twice.
   b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();fn()});
 }
-bindBtn('rl',reload);bindBtn('bk',()=>toggleInv());bindBtn('fb',flash);bindBtn('interactBtn',interact);
+bindBtn('rl',reload);bindBtn('bk',()=>toggleInv());bindBtn('fb',flash);bindBtn('interactBtn',interact);bindBtn('medBtn',useQuickMed);
 
 // ---------- inventory ----------
 function renderInv(){
-  const g=document.getElementById('grid');g.innerHTML='';g.style.display='grid';g.style.gridTemplateColumns='repeat(4,minmax(0,1fr))';g.style.gap='7px';
+  const g=document.getElementById('grid');g.innerHTML='';g.style.display='grid';g.style.gridTemplateColumns=(innerWidth<=430?'repeat(3,minmax(0,1fr))':'repeat(4,minmax(0,1fr))');g.style.gap='8px';
   for(let i=0;i<slotsNow();i++){
     const cell=document.createElement('div');cell.style.cssText='min-width:0;background:#21180f;border:1px solid #6b5230;border-radius:6px;padding:3px;text-align:center;';
     const c=document.createElement('canvas');c.width=c.height=120;c.style.cssText='width:100%;height:auto;display:block;cursor:pointer';const x=c.getContext('2d');const it=G.p.inv[i];
-    if(it){icon(x,it.k,60,50,2.2);x.fillStyle='#fff8e7';x.font='bold 15px "Trebuchet MS",sans-serif';x.textAlign='center';x.fillText(it.k==='med'?'+40 HP':(it.v||0)+' кр',60,108);c.title=(it.n||it.k)+' — нажми, чтобы использовать';c.addEventListener('click',()=>useSlot(i));
-      const b=document.createElement('button');b.className='btn';b.textContent='ВЫБРОСИТЬ';b.style.cssText='font-size:9px;padding:5px 1px;width:100%;white-space:normal;line-height:1.1';b.addEventListener('click',e=>{e.stopPropagation();dropInvItem(i)});cell.append(c,b);
+    if(it){icon(x,it.k,60,50,2.2);x.fillStyle='#fff8e7';x.font='bold 15px "Trebuchet MS",sans-serif';x.textAlign='center';x.fillText(it.k==='med'?'+40 HP':(it.v||0)+' кр',60,108);const name=document.createElement('div');name.textContent=it.n||({ak:'Автомат',pistol:'Пистолет',smg:'Мини-ПП',shotgun:'Дробовик',rifle:'Винтовка',med:'Аптечка',food:'Паёк',snack:'Батончик',water:'Вода',cheese:'Сыр',honey:'Мёд',bolt:'Болты',radio:'Рация',watch:'Часы',gem:'Алмаз'}[it.k]||it.k);name.style.cssText='font-size:10px;line-height:1.15;color:#e8d9a8;min-height:23px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;padding:2px 0';const usable=['med','food','cheese','honey','snack','water'].includes(it.k);c.title=usable?(it.n||it.k)+' — нажми, чтобы использовать':(it.n||it.k)+' — этот предмет нельзя использовать нажатием';if(usable)c.addEventListener('click',()=>useSlot(i));cell.append(c,name);
+      const b=document.createElement('button');b.className='btn';b.textContent='ВЫБРОСИТЬ';b.style.cssText='font-size:9px;padding:5px 1px;width:100%;white-space:normal;line-height:1.1';b.addEventListener('click',e=>{e.stopPropagation();dropInvItem(i)});cell.append(b);
     }else{c.style.opacity='.15';cell.append(c);const empty=document.createElement('div');empty.textContent='ПУСТО';empty.style.cssText='font-size:9px;color:#8e8068;padding:4px';cell.append(empty)}
     g.appendChild(cell)
   }
-  document.getElementById('iv').textContent='Лут: '+invValue()+' кр · слотов '+G.p.inv.length+'/'+slotsNow()+'. Нажми на предмет, чтобы использовать; кнопка «ВЫБРОСИТЬ» оставит его на земле.'}
+  document.getElementById('iv').textContent='Лут: '+invValue()+' кр · слотов '+G.p.inv.length+'/'+slotsNow()+'. Еда, вода и аптечки используются нажатием. Оружие, броня, патроны и прочий лут не исчезают от нажатия — выбросить предмет можно только кнопкой «ВЫБРОСИТЬ».'}
 function dropInvItem(i){if(!G||!G.p.inv[i])return;const it=G.p.inv.splice(i,1)[0];const a=G.p.ang||0;const x=Math.max(20,Math.min(MW-20,G.p.x+Math.cos(a)*28)),y=Math.max(20,Math.min(MH-20,G.p.y+Math.sin(a)*28));G.floorItems.push({x,y,it,done:false,kind:'loose'});floaty(x,y,'Брошено: '+(it.n||it.k));renderInv()}
-function useSlot(i){const it=G.p.inv[i];if(!it)return;const p=G.p;if(it.k==='med'){if(p.hp>=100)return;p.hp=Math.min(100,p.hp+40)}else if(it.k==='food'||it.k==='cheese'||it.k==='honey'){if(p.hunger>=100&&p.hp>=100)return;const hp=it.k==='honey'?12:18,food=it.k==='cheese'?24:it.k==='honey'?18:48;p.hp=Math.min(100,p.hp+hp);p.hunger=Math.min(100,p.hunger+food);p.thirst=Math.min(100,p.thirst+(it.k==='food'?8:2))}else if(it.k==='snack'){if(p.hunger>=100&&p.hp>=100)return;p.hp=Math.min(100,p.hp+12);p.hunger=Math.min(100,p.hunger+32)}else if(it.k==='water'){if(p.thirst>=100&&p.hp>=100)return;p.hp=Math.min(100,p.hp+5);p.thirst=Math.min(100,p.thirst+48)}else{G.p.inv.splice(i,1);renderInv();return}G.p.inv.splice(i,1);renderInv()}
+function useQuickMed(){if(!G||G.over||G.paused)return;const i=G.p.inv.findIndex(it=>it.k==='med');if(i<0)return;if(G.p.hp>=100){floaty(G.p.x,G.p.y,'Здоровье полное');return}useSlot(i)}
+function useSlot(i){if(!G||!G.p||!G.p.inv[i])return;const it=G.p.inv[i];const usable=['med','food','cheese','honey','snack','water'];if(!usable.includes(it.k))return;const p=G.p;if(it.k==='med'){if(p.hp>=100)return;p.hp=Math.min(100,p.hp+40);floaty(p.x,p.y,'+40 HP')}else if(it.k==='food'||it.k==='cheese'||it.k==='honey'){if(p.hunger>=100&&p.hp>=100)return;const hp=it.k==='honey'?12:18,food=it.k==='cheese'?24:it.k==='honey'?18:48;p.hp=Math.min(100,p.hp+hp);p.hunger=Math.min(100,p.hunger+food);p.thirst=Math.min(100,p.thirst+(it.k==='food'?8:2))}else if(it.k==='snack'){if(p.hunger>=100&&p.hp>=100)return;p.hp=Math.min(100,p.hp+12);p.hunger=Math.min(100,p.hunger+32)}else if(it.k==='water'){if(p.thirst>=100&&p.hp>=100)return;p.hp=Math.min(100,p.hp+5);p.thirst=Math.min(100,p.thirst+48)}else{return}G.p.inv.splice(i,1);renderInv()}
 function toggleInv(){if(!G||G.over)return;G.paused=!G.paused;const o=document.getElementById('inv');
   if(G.paused){joy.m=joy.a=null;renderInv();o.classList.add('on')}else o.classList.remove('on')}
 document.getElementById('ic').addEventListener('click',toggleInv);
@@ -876,7 +893,7 @@ function drawObs(o){
     const cb=lw?{x:o.x+o.w*.22,y:o.y+3,w:o.w*.5,h:o.h-6}:{x:o.x+3,y:o.y+o.h*.22,w:o.w-6,h:o.h*.5};
     box(cb.x,cb.y,cb.w,cb.h,27,bc(o.col),14);
     face(cb,'f',()=>{ctx.fillStyle='#1d2b35';ctx.fillRect(2,12,cb.w-4,10);ctx.fillStyle='rgba(190,225,240,.55)';ctx.fillRect(5,13,Math.max(5,cb.w*.25),3);ctx.fillStyle='#292d30';ctx.fillRect(cb.w*.48,12,2,10)});
-    face(o,'f',()=>{ctx.fillStyle='#d8d3a1';ctx.fillRect(5,1,12,5);ctx.fillRect(o.w-17,1,12,5);ctx.fillStyle='#b52d26';ctx.fillRect(5,o.h-7,10,5);ctx.fillRect(o.w-15,o.h-7,10,5)});break}
+    face(o,'f',()=>{ctx.fillStyle='#d8d3a1';ctx.fillRect(5,1,12,5);ctx.fillRect(o.w-17,1,12,5);/* Removed misprojected red rear-light blocks that appeared to float beside vehicles on mobile. */});break}
   case 'barrel':{const b=P(o.x+8,o.y+8,0),t=P(o.x+8,o.y+8,22);ctx.fillStyle=sh(o.col,.7);ctx.strokeStyle=INK;ctx.lineWidth=1.5;
     ctx.fillRect(t.x-8,t.y,16,b.y-t.y);ctx.beginPath();ctx.ellipse(b.x,b.y,8,4,0,0,7);ctx.fill();ctx.stroke();
     ctx.fillStyle=o.col;ctx.beginPath();ctx.ellipse(t.x,t.y,8,4,0,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(t.x-8,t.y+8,16,3);break}
@@ -924,7 +941,8 @@ function weather(t){
 
 function draw(t){
   ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#2a2014';ctx.fillRect(0,0,W,H);
-  if(!G){drawMini();document.getElementById('interactBtn').style.display='none';return}
+  if(!G){drawMini();document.getElementById('interactBtn').style.display='none';document.getElementById('medBtn').style.display='none';return}
+  const medBtn=document.getElementById('medBtn');const medIndex=G.p.inv.findIndex(it=>it.k==='med');medBtn.style.display=(!G.over&&!G.paused&&medIndex>=0&&G.p.hp<100)?'block':'none';medBtn.textContent=medIndex>=0?'✚ АПТЕЧКА':'АПТЕЧКИ НЕТ';
   document.getElementById('interactBtn').style.display=G.over||G.paused?'none':((G.inHouse?!!nearestRoomLoot():!!nearbyFloorItem()||G.crates.some(c=>!c.done&&Math.hypot(c.x-G.p.x,c.y-G.p.y)<48))?'block':'none');document.getElementById('interactBtn').textContent=G.inHouse?(nearestRoomLoot()?'ВЗЯТЬ':'ОСМОТР'):(nearbyFloorItem()?'ВЗЯТЬ':(G.crates.some(c=>!c.done&&Math.hypot(c.x-G.p.x,c.y-G.p.y)<48)?'ОТКРЫТЬ':'ОСМОТР'));
   if(G.lootOpen)document.getElementById('lootPanel').classList.add('on');
   const p=G.p;camX=G.cam.x+(G.shake>0?R(-4,4):0);camY=G.cam.y+(G.shake>0?R(-4,4):0);
