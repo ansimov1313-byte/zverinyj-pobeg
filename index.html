@@ -267,8 +267,8 @@ function houseWallBlocked(x,y,r){
   // Keep the player inside the doorway threshold until they press INTERACT to leave.
   return false;
 }
-function doorPass(x,y,r,wall){return !!(!G.inHouse&&wall&&(wall.t==='house'||wall.t==='shop')&&Math.abs(x-(wall.x+wall.w/2))<Math.min(25,wall.w*.18)&&y>wall.y+wall.h-r-8&&y<wall.y+wall.h+30)}
-function move(o,dx,dy,r){const ox=o.x,oy=o.y;const nx=o.x+dx;const wx=hitWall(nx,o.y,r);if(nx>r&&nx<MW-r&&!houseWallBlocked(nx,o.y,r)&&(!wx||doorPass(nx,o.y,r,wx)))o.x=nx;const ny=o.y+dy;const wy=hitWall(o.x,ny,r);if(ny>r&&ny<MH-r&&!houseWallBlocked(o.x,ny,r)&&(!wy||doorPass(o.x,ny,r,wy)))o.y=ny;return Math.hypot(o.x-ox,o.y-oy)}
+function doorPass(o,x,y,r,wall){return !!(o===G.p&&!G.inHouse&&wall&&(wall.t==='house'||wall.t==='shop')&&Math.abs(x-(wall.x+wall.w/2))<Math.min(25,wall.w*.18)&&y>wall.y+wall.h-r-8&&y<wall.y+wall.h+30)}
+function move(o,dx,dy,r){const ox=o.x,oy=o.y;const nx=o.x+dx;const wx=hitWall(nx,o.y,r);if(nx>r&&nx<MW-r&&!houseWallBlocked(nx,o.y,r)&&(!wx||doorPass(o,nx,o.y,r,wx)))o.x=nx;const ny=o.y+dy;const wy=hitWall(o.x,ny,r);if(ny>r&&ny<MH-r&&!houseWallBlocked(o.x,ny,r)&&(!wy||doorPass(o,o.x,ny,r,wy)))o.y=ny;return Math.hypot(o.x-ox,o.y-oy)}
 function los(a,b){const d=Math.hypot(b.x-a.x,b.y-a.y);for(let t=0;t<d;t+=14){const x=a.x+(b.x-a.x)*t/d,y=a.y+(b.y-a.y)*t/d;for(const w of G.obs)if(w.see!==false&&x>w.x&&x<w.x+w.w&&y>w.y&&y<w.y+w.h)return false}return true}
 function free(m,far){for(let i=0;i<80;i++){const x=R(80,MW-80),y=R(80,MH-80);if(!hitWall(x,y,m)&&Math.hypot(x-G.p.x,y-G.p.y)>far&&Math.hypot(x-G.ex.x,y-G.ex.y)>200)return{x,y}}return{x:MW/2,y:MH/2}}
 function lootFree(gap=145,far=170){for(let i=0;i<220;i++){const p=free(14,far);let ok=true;for(const q of [...(G.crates||[]),...(G.floorItems||[])])if(Math.hypot(q.x-p.x,q.y-p.y)<gap){ok=false;break}if(ok)return p}return free(14,far)}
@@ -641,11 +641,11 @@ function nearHouse(){
   return best;
 }
 function nearestRoomLoot(){if(!G||!G.inHouse||!G.currentHouse)return null;let b=null,d=Infinity;for(const q of G.currentHouse.roomLoot||[]){if(q.done)continue;const dd=Math.hypot(q.x-G.p.x,q.y-G.p.y);if(dd<d){d=dd;b=q}}return d<62?b:null}
-function nearbyFloorItem(){if(!G||G.inHouse)return null;let b=null,d=Infinity;for(const q of G.floorItems){if(q.done)continue;const dd=Math.hypot(q.x-G.p.x,q.y-G.p.y);if(dd<d){d=dd;b=q}}return d<42?b:null}
+function nearbyFloorItem(){if(!G)return null;let b=null,d=Infinity;for(const q of G.floorItems){if(q.done)continue;const dd=Math.hypot(q.x-G.p.x,q.y-G.p.y);if(dd<d){d=dd;b=q}}return d<42?b:null}
 function openLoot(source){if(!G||G.over)return;G.lootOpen=true;G.lootSource=source||'floor';renderLoot();document.getElementById('lootPanel').classList.add('on');sfx('open')}
 function closeLoot(){if(G)G.lootOpen=false;document.getElementById('lootPanel').classList.remove('on');sfx('close')}
 function lootCandidates(){if(!G)return [];let items=[];
- if(G.inHouse&&G.currentHouse)items=(G.currentHouse.roomLoot||[]).filter(q=>!q.done&&Math.hypot(q.x-G.p.x,q.y-G.p.y)<100).map(q=>({q,src:'room'}));
+ if(G.inHouse&&G.currentHouse){items=(G.currentHouse.roomLoot||[]).filter(q=>!q.done&&Math.hypot(q.x-G.p.x,q.y-G.p.y)<100).map(q=>({q,src:'room'}));items.push(...G.floorItems.filter(q=>!q.done&&Math.hypot(q.x-G.p.x,q.y-G.p.y)<95).map(q=>({q,src:'floor'})));}
  else {items=G.floorItems.filter(q=>!q.done&&Math.hypot(q.x-G.p.x,q.y-G.p.y)<95).map(q=>({q,src:'floor'}));for(const c of G.crates){if(!c.done&&Math.hypot(c.x-G.p.x,c.y-G.p.y)<48)items.push({q:{...c,n:c.kind==='bag'?'Рюкзак':c.kind==='medbag'?'Медицинская сумка':c.kind==='cabinet'?'Шкафчик':c.kind==='tool'?'Ящик с инструментами':'Контейнер'},src:'crate'})}}
  return items;
 }
@@ -801,13 +801,19 @@ function update(dt){
   if(p.res>0)p.nm=0;
   let near=null;if(!G.inHouse)for(const c of G.crates)if(!c.done&&Math.hypot(c.x-p.x,c.y-p.y)<48)near=c;
   for(const c of G.crates)if(c!==near)c.open=Math.max(0,c.open-dt);
-  if(!G.inHouse)for(const a of G.ammo)if(!a.d&&Math.hypot(a.x-p.x,a.y-p.y)<34){a.d=true;p.res+=a.n;floaty(a.x,a.y,'+'+a.n+' патр.')}
-  if(!G.inHouse)for(const b of G.bags)if(!b.d&&Math.hypot(b.x-p.x,b.y-p.y)<36){
+  for(const a of G.ammo)if(!a.d&&Math.hypot(a.x-p.x,a.y-p.y)<34){a.d=true;p.res+=a.n;floaty(a.x,a.y,'+'+a.n+' патр.')}
+  for(const b of G.bags)if(!b.d&&Math.hypot(b.x-p.x,b.y-p.y)<36){
     if(b.tag){S.trophies[b.tag]=Number(S.trophies[b.tag]||0)+1;b.d=true;floaty(b.x,b.y,'+ жетон '+TAGN[b.tag]);save()}
     else{const money=Math.max(1,Math.round((b.v||0)*.7));S.caps+=money;b.d=true;floaty(b.x,b.y,'+'+money+' кр');save()}
   }
   const ex=G.ex;if(!G.inHouse&&Math.hypot(ex.x-p.x,ex.y-p.y)<ex.r){ex.prog+=dt;if(ex.prog>=3)return finish(true)}else if(!G.inHouse)ex.prog=Math.max(0,ex.prog-dt*2);
-  const dm=detMul();if(!G.inHouse)for(const e of G.en)enemyAI(e,dt,dm);
+  const dm=detMul();
+  // Simulate the outdoor world while the player is indoors. Temporarily disable
+  // the player's interior-wall collision rules so enemies outside can keep moving;
+  // normal building collision still blocks them from walking through walls.
+  const wasInHouse=G.inHouse;if(wasInHouse)G.inHouse=false;
+  for(const e of G.en)enemyAI(e,dt,dm);
+  if(wasInHouse)G.inHouse=true;
   for(const b of G.bul){
     b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
     const ih=G.inHouse&&G.currentHouse?G.currentHouse:null;const hitIndoorWall=ih&&(b.x<ih.x+3||b.x>ih.x+ih.w-3||b.y<ih.y+3||(b.y>ih.y+ih.h-3&&Math.abs(b.x-(ih.x+ih.w/2))>24));
@@ -943,7 +949,7 @@ function draw(t){
   ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#2a2014';ctx.fillRect(0,0,W,H);
   if(!G){drawMini();document.getElementById('interactBtn').style.display='none';document.getElementById('medBtn').style.display='none';return}
   const medBtn=document.getElementById('medBtn');const medIndex=G.p.inv.findIndex(it=>it.k==='med');medBtn.style.display=(!G.over&&!G.paused&&medIndex>=0&&G.p.hp<100)?'block':'none';medBtn.textContent=medIndex>=0?'✚ АПТЕЧКА':'АПТЕЧКИ НЕТ';
-  document.getElementById('interactBtn').style.display=G.over||G.paused?'none':((G.inHouse?!!nearestRoomLoot():!!nearbyFloorItem()||G.crates.some(c=>!c.done&&Math.hypot(c.x-G.p.x,c.y-G.p.y)<48))?'block':'none');document.getElementById('interactBtn').textContent=G.inHouse?(nearestRoomLoot()?'ВЗЯТЬ':'ОСМОТР'):(nearbyFloorItem()?'ВЗЯТЬ':(G.crates.some(c=>!c.done&&Math.hypot(c.x-G.p.x,c.y-G.p.y)<48)?'ОТКРЫТЬ':'ОСМОТР'));
+  const roomItem=G.inHouse?nearestRoomLoot():null;const groundItem=nearbyFloorItem();const nearCrate=!G.inHouse&&G.crates.some(c=>!c.done&&Math.hypot(c.x-G.p.x,c.y-G.p.y)<48);document.getElementById('interactBtn').style.display=G.over||G.paused?'none':((roomItem||groundItem||nearCrate)?'block':'none');document.getElementById('interactBtn').textContent=(roomItem||groundItem)?'ВЗЯТЬ':(nearCrate?'ОТКРЫТЬ':'ОСМОТР');
   if(G.lootOpen)document.getElementById('lootPanel').classList.add('on');
   const p=G.p;camX=G.cam.x+(G.shake>0?R(-4,4):0);camY=G.cam.y+(G.shake>0?R(-4,4):0);
   drawFloor(t);
